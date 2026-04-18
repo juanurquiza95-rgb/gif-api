@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Gif;
 
-use App\Gif\Application\DTO\GifSearchResult;
+use App\Gif\Application\DTO\GifCollection;
 use App\Gif\Domain\Entity\Gif;
 use App\Gif\Domain\Port\GifProviderInterface;
 use App\Gif\Domain\ValueObject\GifSearchCriteria;
@@ -16,9 +16,9 @@ final class SearchGifsControllerTest extends TestCase
     {
         $this->app->bind(GifProviderInterface::class, static fn (): GifProviderInterface => new class implements GifProviderInterface
         {
-            public function search(GifSearchCriteria $criteria): GifSearchResult
+            public function search(GifSearchCriteria $criteria): GifCollection
             {
-                return new GifSearchResult(
+                return new GifCollection(
                     items: [
                         new Gif(
                             id: 'abc123',

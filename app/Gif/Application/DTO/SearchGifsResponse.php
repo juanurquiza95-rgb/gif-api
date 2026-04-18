@@ -17,7 +17,7 @@ final class SearchGifsResponse
     ) {
     }
 
-    public static function fromDomain(GifSearchResult $result): self
+    public static function fromDomain(GifCollection $result): self
     {
         return new self(
             items: array_map(

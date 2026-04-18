@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Gif;
 
-use App\Gif\Application\DTO\GifSearchResult;
+use App\Gif\Application\DTO\GifCollection;
 use App\Gif\Application\DTO\SearchGifsInput;
 use App\Gif\Application\UseCase\SearchGifs\SearchGifsUseCase;
 use App\Gif\Domain\Entity\Gif;
@@ -18,9 +18,9 @@ final class SearchGifsUseCaseTest extends TestCase
     {
         $provider = new class implements GifProviderInterface
         {
-            public function search(GifSearchCriteria $criteria): GifSearchResult
+            public function search(GifSearchCriteria $criteria): GifCollection
             {
-                return new GifSearchResult(
+                return new GifCollection(
                     items: [
                         new Gif(
                             id: 'gif-1',

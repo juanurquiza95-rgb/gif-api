@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Gif\Infrastructure\Giphy\Mapper;
 
-use App\Gif\Application\DTO\GifSearchResult;
+use App\Gif\Application\DTO\GifCollection;
 use App\Gif\Domain\Entity\Gif;
 use App\Gif\Domain\Exception\GifProviderException;
 use App\Gif\Infrastructure\Giphy\DTO\GiphyGifDTO;
@@ -14,7 +14,7 @@ final class GiphyGifMapper
     /**
      * @param array<string, mixed> $payload
      */
-    public function mapSearchResult(array $payload): GifSearchResult
+    public function mapSearchResult(array $payload): GifCollection
     {
         $data = $payload['data'] ?? null;
         $pagination = $payload['pagination'] ?? null;
@@ -27,7 +27,7 @@ final class GiphyGifMapper
             throw new GifProviderException('Invalid Giphy response: missing or invalid "pagination" field.');
         }
 
-        return new GifSearchResult(
+        return new GifCollection(
             items: array_map(fn (mixed $gif): Gif => $this->mapGif($gif), $data),
             totalCount: (int) ($pagination['total_count'] ?? 0),
             count: (int) ($pagination['count'] ?? 0),

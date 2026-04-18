@@ -1,5 +1,6 @@
 <?php
 
+use App\Shared\Infrastructure\Http\Exception\ApiExceptionMapper;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,5 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Throwable $exception) {
+            return app(ApiExceptionMapper::class)->toResponse($exception);
+        });
     })->create();

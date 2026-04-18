@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Gif;
 
 use App\Gif\Application\DTO\GetGifByIdInput;
-use App\Gif\Application\DTO\GifSearchResult;
+use App\Gif\Application\DTO\GifCollection;
 use App\Gif\Application\UseCase\GetGifById\GetGifByIdUseCase;
 use App\Gif\Domain\Entity\Gif;
 use App\Gif\Domain\Port\GifProviderInterface;
@@ -19,7 +19,7 @@ final class GetGifByIdUseCaseTest extends TestCase
     {
         $provider = new class implements GifProviderInterface
         {
-            public function search(GifSearchCriteria $criteria): GifSearchResult
+            public function search(GifSearchCriteria $criteria): GifCollection
             {
                 throw new \BadMethodCallException('Not needed for this test.');
             }
@@ -55,7 +55,7 @@ final class GetGifByIdUseCaseTest extends TestCase
     {
         $provider = new class implements GifProviderInterface
         {
-            public function search(GifSearchCriteria $criteria): GifSearchResult
+            public function search(GifSearchCriteria $criteria): GifCollection
             {
                 throw new \BadMethodCallException('Not needed for this test.');
             }

@@ -6,7 +6,7 @@ namespace App\Gif\Application\DTO;
 
 use App\Gif\Domain\Entity\Gif;
 
-final class GifSearchResult
+final class GifCollection
 {
     /**
      * @param array<int, Gif> $items

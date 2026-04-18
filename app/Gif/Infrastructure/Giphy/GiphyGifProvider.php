@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Gif\Infrastructure\Giphy;
 
-use App\Gif\Application\DTO\GifSearchResult;
+use App\Gif\Application\DTO\GifCollection;
 use App\Gif\Domain\Entity\Gif;
 use App\Gif\Domain\Port\GifProviderInterface;
 use App\Gif\Domain\ValueObject\GifSearchCriteria;
@@ -19,7 +19,7 @@ final class GiphyGifProvider implements GifProviderInterface
     ) {
     }
 
-    public function search(GifSearchCriteria $criteria): GifSearchResult
+    public function search(GifSearchCriteria $criteria): GifCollection
     {
         $payload = $this->client->get('/v1/gifs/search', [
             'q' => $criteria->query,

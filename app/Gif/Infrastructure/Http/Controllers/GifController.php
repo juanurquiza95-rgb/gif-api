@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Gif\Infrastructure\Http\Controllers;
 
-use App\Gif\Application\DTO\GetGifByIdInput;
 use App\Gif\Application\UseCase\GetGifById\GetGifByIdUseCase;
 use App\Gif\Application\UseCase\SearchGifs\SearchGifsUseCase;
+use App\Gif\Application\DTO\GetGifByIdInput;
 use App\Gif\Infrastructure\Http\Requests\SearchGifsRequest;
 use Illuminate\Http\JsonResponse;
 
