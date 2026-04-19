@@ -11,9 +11,11 @@ use App\Gif\Domain\ValueObject\GifSearchCriteria;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Support\CreatesAccessTokens;
 
 final class StoreFavoriteGifControllerTest extends TestCase
 {
+    use CreatesAccessTokens;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -49,7 +51,7 @@ final class StoreFavoriteGifControllerTest extends TestCase
             'gif_id' => 'gif-123',
             'alias' => 'Funny cat',
             'user_id' => $user->id,
-        ]);
+        ], $this->authHeaderFor($user));
 
         $response
             ->assertCreated()
@@ -71,14 +73,15 @@ final class StoreFavoriteGifControllerTest extends TestCase
 
     public function test_it_validates_required_fields(): void
     {
-        $response = $this->postJson('/api/gifs/favorites', []);
+        $user = User::factory()->create();
+
+        $response = $this->postJson('/api/gifs/favorites', [], $this->authHeaderFor($user));
 
         $response
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
                 'gif_id',
                 'alias',
-                'user_id',
             ]);
     }
 
@@ -90,13 +93,13 @@ final class StoreFavoriteGifControllerTest extends TestCase
             'gif_id' => 'gif-123',
             'alias' => 'Old alias',
             'user_id' => $user->id,
-        ])->assertCreated();
+        ], $this->authHeaderFor($user))->assertCreated();
 
         $this->postJson('/api/gifs/favorites', [
             'gif_id' => 'gif-123',
             'alias' => 'New alias',
             'user_id' => $user->id,
-        ])->assertCreated();
+        ], $this->authHeaderFor($user))->assertCreated();
 
         $this->assertDatabaseCount('favorite_gifs', 1);
         $this->assertDatabaseHas('favorite_gifs', [
@@ -104,5 +107,33 @@ final class StoreFavoriteGifControllerTest extends TestCase
             'alias' => 'New alias',
             'user_id' => $user->id,
         ]);
+    }
+
+    public function test_it_rejects_mismatched_user_id(): void
+    {
+        $authenticatedUser = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        $response = $this->postJson('/api/gifs/favorites', [
+            'gif_id' => 'gif-123',
+            'alias' => 'Funny cat',
+            'user_id' => $otherUser->id,
+        ], $this->authHeaderFor($authenticatedUser));
+
+        $response
+            ->assertUnauthorized()
+            ->assertJson([
+                'message' => 'Unauthenticated.',
+            ]);
+    }
+
+    public function test_it_requires_authentication(): void
+    {
+        $this->assertRequiresAuthentication(
+            $this->postJson('/api/gifs/favorites', [
+                'gif_id' => 'gif-123',
+                'alias' => 'Funny cat',
+            ])
+        );
     }
 }

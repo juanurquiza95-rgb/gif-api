@@ -8,12 +8,20 @@ use App\Gif\Application\DTO\GifCollection;
 use App\Gif\Domain\Entity\Gif;
 use App\Gif\Domain\Port\GifProviderInterface;
 use App\Gif\Domain\ValueObject\GifSearchCriteria;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Support\CreatesAccessTokens;
 
 final class SearchGifsControllerTest extends TestCase
 {
+    use CreatesAccessTokens;
+    use RefreshDatabase;
+
     public function test_it_returns_a_gif_collection(): void
     {
+        $user = User::factory()->create();
+
         $this->app->bind(GifProviderInterface::class, static fn (): GifProviderInterface => new class implements GifProviderInterface
         {
             public function search(GifSearchCriteria $criteria): GifCollection
@@ -41,7 +49,10 @@ final class SearchGifsControllerTest extends TestCase
             }
         });
 
-        $response = $this->getJson('/api/gifs/search?query=cats&limit=1&offset=5');
+        $response = $this->getJson(
+            '/api/gifs/search?query=cats&limit=1&offset=5',
+            $this->authHeaderFor($user),
+        );
 
         $response
             ->assertOk()
@@ -66,10 +77,19 @@ final class SearchGifsControllerTest extends TestCase
 
     public function test_it_validates_the_query_parameter(): void
     {
-        $response = $this->getJson('/api/gifs/search');
+        $user = User::factory()->create();
+
+        $response = $this->getJson('/api/gifs/search', $this->authHeaderFor($user));
 
         $response
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['query']);
+    }
+
+    public function test_it_requires_authentication(): void
+    {
+        $this->assertRequiresAuthentication(
+            $this->getJson('/api/gifs/search?query=cats')
+        );
     }
 }
