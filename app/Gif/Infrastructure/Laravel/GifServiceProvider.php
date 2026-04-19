@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Gif\Infrastructure\Laravel;
 
+use App\Gif\Domain\Port\FavoriteGifRepositoryInterface;
 use App\Gif\Domain\Port\GifProviderInterface;
 use App\Gif\Infrastructure\Giphy\Client\GiphyHttpClient;
 use App\Gif\Infrastructure\Giphy\GiphyGifProvider;
+use App\Gif\Infrastructure\Persistence\Eloquent\EloquentFavoriteGifRepository;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,5 +28,6 @@ final class GifServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(GifProviderInterface::class, GiphyGifProvider::class);
+        $this->app->bind(FavoriteGifRepositoryInterface::class, EloquentFavoriteGifRepository::class);
     }
 }

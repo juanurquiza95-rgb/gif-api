@@ -21,18 +21,14 @@ final class GiphyGifProvider implements GifProviderInterface
 
     public function search(GifSearchCriteria $criteria): GifCollection
     {
-        $payload = $this->client->get('/v1/gifs/search', [
-            'q' => $criteria->query,
-            'limit' => $criteria->limit,
-            'offset' => $criteria->offset,
-        ]);
+        $payload = $this->client->searchGifs($criteria);
 
         return $this->mapper->mapSearchResult($payload);
     }
 
     public function findById(string $id): Gif
     {
-        $payload = $this->client->get(sprintf('/v1/gifs/%s', $id));
+        $payload = $this->client->getGifById($id);
 
         return $this->mapper->mapSingleGifResult($payload);
     }
