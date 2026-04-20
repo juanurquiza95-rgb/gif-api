@@ -46,6 +46,8 @@ final class GiphyHttpClient
      */
     private function get(string $path, array $query = []): array
     {
+        $this->ensureConfigured();
+
         try {
             $response = $this->http
                 ->baseUrl($this->baseUrl)
@@ -61,7 +63,10 @@ final class GiphyHttpClient
                 throw new GifNotFoundException(basename($path), $exception);
             }
 
-            throw new GifProviderException(previous: $exception);
+            throw new GifProviderException(
+                message: $this->providerErrorMessage($exception),
+                previous: $exception,
+            );
         } catch (Throwable $exception) {
             throw new GifProviderException(previous: $exception);
         }
@@ -94,5 +99,43 @@ final class GiphyHttpClient
         }
 
         return ($payload['meta']['msg'] ?? null) === 'Validation error';
+    }
+
+    private function providerErrorMessage(RequestException $exception): string
+    {
+        return match ($exception->response->status()) {
+            401 => 'GIF provider rejected the configured API key.',
+            429 => 'GIF provider rate limit exceeded.',
+            default => $this->providerMessage($exception)
+                ?? 'Failed to communicate with GIF provider.',
+        };
+    }
+
+    private function providerMessage(RequestException $exception): ?string
+    {
+        $payload = $exception->response->json();
+
+        if (!is_array($payload)) {
+            return null;
+        }
+
+        $message = $payload['meta']['msg'] ?? null;
+
+        if (!is_string($message) || trim($message) === '') {
+            return null;
+        }
+
+        return sprintf('GIF provider request failed: %s.', trim($message));
+    }
+
+    private function ensureConfigured(): void
+    {
+        if (trim($this->baseUrl) === '') {
+            throw new GifProviderException('GIF provider base URL is not configured.');
+        }
+
+        if (trim($this->apiKey) === '') {
+            throw new GifProviderException('GIF provider API key is not configured.');
+        }
     }
 }
