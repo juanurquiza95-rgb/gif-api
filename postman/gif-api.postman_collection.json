@@ -1,0 +1,355 @@
+{
+  "info": {
+    "name": "GIF API Challenge",
+    "description": "Postman collection for testing login, GIF search, GIF detail, and favorite GIF endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login returns a token', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.token).to.be.a('string').and.not.empty;",
+                  "    pm.expect(json.expires_at).to.be.a('string').and.not.empty;",
+                  "    pm.environment.set('token', json.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Authenticates a user and stores the returned token in the selected Postman environment variable `token`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GIFs",
+      "item": [
+        {
+          "name": "Search GIFs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Search returns GIF collection', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "    pm.expect(json.pagination).to.be.an('object');",
+                  "    if (json.data.length > 0) {",
+                  "        pm.environment.set('gif_id', json.data[0].id);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gifs/search?query=cat&limit=5&offset=0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gifs",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "cat"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Searches GIFs in Giphy. Requires `Authorization: Bearer {{token}}`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get GIF by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gifs/{{gif_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gifs",
+                "{{gif_id}}"
+              ]
+            },
+            "description": "Gets one GIF by ID. Run Search GIFs first to auto-fill `gif_id`, or set it manually."
+          },
+          "response": []
+        },
+        {
+          "name": "Save Favorite GIF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gif_id\": \"{{gif_id}}\",\n  \"alias\": \"My favorite cat GIF\",\n  \"user_id\": {{user_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/gifs/favorites",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gifs",
+                "favorites"
+              ]
+            },
+            "description": "Stores a GIF as favorite. `user_id` must match the authenticated token user if provided."
+          },
+          "response": []
+        },
+        {
+          "name": "Save Favorite GIF Without user_id",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gif_id\": \"{{gif_id}}\",\n  \"alias\": \"My favorite cat GIF\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/gifs/favorites",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gifs",
+                "favorites"
+              ]
+            },
+            "description": "Stores a favorite using the authenticated user from the token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Cases",
+      "item": [
+        {
+          "name": "Search Without Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gifs/search?query=cat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gifs",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "cat"
+                }
+              ]
+            },
+            "description": "Expected: 401 Unauthenticated."
+          },
+          "response": []
+        },
+        {
+          "name": "Search Missing Query",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gifs/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gifs",
+                "search"
+              ]
+            },
+            "description": "Expected: 422 validation error for query."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Missing GIF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/gifs/not-a-real-gif-id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gifs",
+                "not-a-real-gif-id"
+              ]
+            },
+            "description": "Expected: 404 GIF not found."
+          },
+          "response": []
+        },
+        {
+          "name": "Favorite With Mismatched user_id",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gif_id\": \"{{gif_id}}\",\n  \"alias\": \"Wrong user favorite\",\n  \"user_id\": 999999\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/gifs/favorites",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "gifs",
+                "favorites"
+              ]
+            },
+            "description": "Expected: validation error if user does not exist, or 401 if it exists but does not match the token user."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

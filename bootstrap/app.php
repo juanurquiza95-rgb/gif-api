@@ -2,6 +2,7 @@
 
 use App\Auth\Infrastructure\Http\Middleware\AuthenticateAccessToken;
 use App\Shared\Infrastructure\Http\Exception\ApiExceptionMapper;
+use App\Shared\Infrastructure\Http\Middleware\AuditMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
+            'audit' => AuditMiddleware::class,
             'auth.token' => AuthenticateAccessToken::class,
         ]);
     })

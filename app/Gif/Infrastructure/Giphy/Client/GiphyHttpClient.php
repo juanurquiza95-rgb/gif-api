@@ -57,7 +57,7 @@ final class GiphyHttpClient
                 ])
                 ->throw();
         } catch (RequestException $exception) {
-            if ($exception->response->status() === 404) {
+            if ($this->isGifNotFoundResponse($path, $exception)) {
                 throw new GifNotFoundException(basename($path), $exception);
             }
 
@@ -73,5 +73,26 @@ final class GiphyHttpClient
         }
 
         return $payload;
+    }
+
+    private function isGifNotFoundResponse(string $path, RequestException $exception): bool
+    {
+        $status = $exception->response->status();
+
+        if ($status === 404) {
+            return true;
+        }
+
+        if ($status !== 400 || !str_starts_with($path, '/v1/gifs/')) {
+            return false;
+        }
+
+        $payload = $exception->response->json();
+
+        if (!is_array($payload)) {
+            return false;
+        }
+
+        return ($payload['meta']['msg'] ?? null) === 'Validation error';
     }
 }
