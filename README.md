@@ -56,68 +56,44 @@ Infrastructure/
 
 ---
 
-## Setup
-
-### 1. Clonar proyecto
+## Quick Start
 
 ```bash
 git clone <repo>
 cd gif-api
-```
 
-### 2. Configurar entorno
-
-```bash
 cp .env.example .env
+
+docker run --rm -v ${PWD}:/app -w /app composer:2 install
+
+docker compose up -d
+
+docker compose exec laravel.test php artisan key:generate
+docker compose exec laravel.test php artisan migrate --seed
 ```
 
-Configurar:
+Configurar la API key de Giphy en `.env`:
 
 ```env
 GIPHY_API_KEY=your_api_key
 ```
 
----
-
-### 3. Instalar dependencias
-
-Instalar dependencias con Composer:
-
-```bash
-composer install
-```
-
+> En Windows PowerShell puede ser necesario reemplazar `${PWD}` por `%cd%`.
 > El proyecto usa Laravel Sail. El `compose.yaml` construye el servicio PHP usando el Dockerfile oficial de Sail ubicado en `vendor/laravel/sail/runtimes/8.5/Dockerfile`.
 
----
+El comando de migraciones crea las tablas necesarias y carga el usuario de prueba:
 
-### 4. Levantar Docker
-
-```bash
-docker compose up -d
+```text
+email: test@example.com
+password: password
 ```
 
----
-
-### 5. Generar key
-
-```bash
-docker compose exec laravel.test php artisan key:generate
+```text
+users
+access_tokens
+favorite_gifs
+audit_logs
 ```
-
----
-
-### 6. Migrar base de datos
-
-```bash
-docker compose exec laravel.test php artisan migrate --seed
-```
-
----
-
-### Nota sobre Sail
-
-La carpeta `vendor/` debe existir antes de levantar Docker, porque Laravel Sail guarda ahi el Dockerfile que usa `compose.yaml`.
 
 ---
 
